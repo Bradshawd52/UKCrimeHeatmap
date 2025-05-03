@@ -1,0 +1,78 @@
+ body {
+    background-color: #0e0e0e;
+    color: #ffffff;
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    padding: 1rem;
+  }
+
+  .top-bar {
+    background-color: #1c1c1c;
+    padding: 0.75rem 1rem;
+    margin-bottom: 2rem;
+  }
+
+  .top-bar-title h1 {
+    margin: 0;
+    color: #ffffff;
+    font-size: 1.5rem;
+  }
+
+  .form-container {
+    background-color: #1a1a1a;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+    margin-bottom: 2rem;
+  }
+
+  input[type="text"],
+  select {
+    background-color: #2a2a2a;
+    color: #ffffff;
+    border: 1px solid #444;
+    padding: 0.5rem;
+    width: 100%;
+    margin-bottom: 1rem;
+    border-radius: 4px;
+  }
+
+  input[type="text"]::placeholder {
+    color: #aaa;
+  }
+
+  button[type="submit"] {
+    background-color: #0078d4;
+    color: #ffffff;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+  }
+
+  button[type="submit"]:hover {
+    background-color: #005fa3;
+  }
+
+  .crime-count {
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+  }
+
+  ul.crime-list {
+    list-style: none;
+    padding: 0;
+  }
+
+  ul.crime-list li {
+    padding: 0.5rem;
+    border-bottom: 1px solid #444;
+  }
+
+  @media screen and (min-width: 640px) {
+    .form-container {
+      max-width: 600px;
+      margin: 0 auto;
+    }
+  }
