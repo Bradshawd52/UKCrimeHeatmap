@@ -51,7 +51,7 @@ def get_crime_data_for_date(lat, lng, date, crime_type=None):
     return all_crimes
 
 
-@app.route('/', methods=["GET", "HEAD"])
+@app.route('/')
 def index():
     
     #if not os.path.exists('templates/index.html'):
