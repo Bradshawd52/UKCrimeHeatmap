@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>UK Crime Heatmap</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <style>
+    #map { height: 600px; width: 1000; margin-top: 20px; }
+    body { font-family: sans-serif; padding: 20px; }
+    form { margin-bottom: 20px; }
+    label { margin-right: 10px; }
+    input, select { padding: 5px; }
+  </style>
+</head>
+<body>
+  <h1>UK Crime Heatmap</h1>
+
+  <p>
+    {% if num_crimes %}
+        <strong>{{ num_crimes }}</strong> crime(s) found for the selected filters.
+    {% else %}
+        No crimes found for the selected filters.
+    {% endif %}
+  </p>
+
+
+  <form method="get">
+    <label for="postcode">Postcode:</label>
+    <input type="text" name="postcode" id="postcode" value="{{ postcode }}" placeholder="Enter postcode" />
+    
+    <label for="city">City:</label>
+    <input type="text" name="city" id="city" value="{{ city }}" placeholder="Enter city" />
+    
+    <label for="date">Date:</label>
+    <input type="text" name="date" id="date" value="{{ date }}" placeholder="Enter Year or Year-Month (YYYY-MM)" />
+
+    <label for="crime_type">Crime Type:</label>
+    <select name="crime_type" id="crime_type">
+      <option value="">All Crime Types</option>
+      {% for category in crime_categories %}
+        <option value="{{ category }}" {% if category == request.args.get('crime_type') %}selected{% endif %}>{{ category | replace('-', ' ') | capitalize }}</option>
+      {% endfor %}
+    </select>
+    
+    <button type="submit">Filter</button>
+  </form>
+
+  <div id="map"></div>
+
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/leaflet.heat/dist/leaflet-heat.js"></script>
+  <script>
+    var map = L.map('map').setView([{{ 53.3891119 }}, {{ -2.9593397 }}], 13);
+
+    L.tileLayer('https://api.maptiler.com/maps/streets-v2/{z}/{x}/{y}.png?key=BzEr8dMwG2P23sz0igki', {
+      attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+
+    var heat = L.heatLayer([
+      {% for crime in crimes %}
+        [{{ crime.location.latitude }}, {{ crime.location.longitude }}],
+      {% endfor %}
+    ], {
+      radius: 30, <!-- 35 -->
+      blur: 15,
+      maxZoom: 5, <!-- 17 -->
+    }).addTo(map);
+
+    L.control.scale({ 
+        metric: true, 
+        imperial: false, 
+        position: 'bottomright'
+    }).addTo(map); 
+
+  </script>
+</body>
+</html>
