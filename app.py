@@ -1,7 +1,9 @@
 from flask import Flask, render_template, request
 import requests, os
+from whitenoise import WhiteNoise
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder='static')
+app.wsgi_app = WhiteNoise(app.wsgi_app, root='static/', prefix='static/')
 
 # Get coordinates from Postcode
 def get_coordinates(postcode):
