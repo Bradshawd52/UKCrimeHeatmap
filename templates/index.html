@@ -74,7 +74,7 @@
 
   <div id="map"></div>
 
-  <!--
+  
   {% set location_counts = {} %}
     {% for crime in crimes %}
         {% if crime.location.latitude and crime.location.longitude %}
@@ -85,7 +85,7 @@
                 {% set _ = location_counts.update({key: 1}) %}
             {% endif %}
         {% endif %}
-    {% endfor %} -->
+    {% endfor %} 
 
 
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
@@ -129,7 +129,7 @@
     //Scale End 
 
     // Add invisible circle markers with popups showing crime counts
-  /* {% for location, count in location_counts.items() %}
+    {% for location, count in location_counts.items() %}
   {% set lat, lng = location.split(',') %}
   var marker = L.circleMarker([{{ lat }}, {{ lng }}], {
     radius: 20,
@@ -139,7 +139,7 @@
   }).addTo(map);
 
   marker.bindPopup("{{ count }} crime(s) in this area");
-    {% endfor %} */ 
+    {% endfor %} 
 
     
   </script>
