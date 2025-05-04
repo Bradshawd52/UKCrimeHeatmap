@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request
-import requests, os 
+import requests, os
+from pprint import pprint
 
 app = Flask(__name__)
 
@@ -53,14 +54,10 @@ def get_crime_data_for_date(lat, lng, date, crime_type=None):
 
 @app.route('/')
 def index():
-    
-    #if not os.path.exists('templates/index.html'):
-    #    return "index.html not found!"
-    #return render_template('index.html')
 
     postcode = request.args.get('postcode', '')
     city = request.args.get('city', '')
-    date = request.args.get('date', '2025-01') 
+    date = request.args.get('date', '2025') 
     crime_type = request.args.get('crime_type', '')
 
     # If no postcode is provided, try to get coordinates based on city name
@@ -71,7 +68,7 @@ def index():
         lat, lng = get_geocode_by_city(city)
 
     if not lat or not lng:
-        # Default to London coordinates if no valid city or postcode is found
+        
         lat, lng = get_geocode_by_city('Liverpool')
 
     crimes = get_crime_data_for_date(lat, lng, date, crime_type)
@@ -80,13 +77,9 @@ def index():
 
     # Available crime categories
     crime_categories = [
-        'anti-social-behaviour', 'burglary', 'criminal-damage-arson', 'drugs',
-        'other-crime', 'public-order', 'shoplifting', 'theft-from-the-person',
-        'vehicle-crime', 'violent-crime', 'rape', 'bicycle-theft'
+        'anti-social-behaviour', 'burglary', 'criminal-damage-arson', 'drugs', 'public-order', 'shoplifting', 'theft-from-the-person',
+        'vehicle-crime', 'violent-crime', 'bicycle-theft', 'other-crime'
     ]
-
-
-
 
 
     return render_template(
