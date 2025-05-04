@@ -5,6 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>UK Crime Heatmap</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='index.css')}}"
+    />
+    
   <style>
     #map { height: 600px; width: 1000; margin-top: 20px; }
     body { font-family: sans-serif; padding: 20px; }
@@ -14,65 +19,134 @@
   </style>
 </head>
 <body>
-  <h1>UK Crime Heatmap</h1>
+  
 
-  <p>
-    {% if num_crimes %}
-        <strong>{{ num_crimes }}</strong> crime(s) found for the selected filters.
-    {% else %}
-        No crimes found for the selected filters.
-    {% endif %}
-  </p>
+  <div class="grid-container">
+    <div class="grid-x grid-padding-x align-center">
 
-
-  <form method="get">
-    <label for="postcode">Postcode:</label>
-    <input type="text" name="postcode" id="postcode" value="{{ postcode }}" placeholder="Enter postcode" />
+        <div class="cell top-bar">
+            <div class="top-bar-left">
+              <div class="top-bar-title">
+                <h1 class="dancing-script-font">UK Crime Heatmap</h1>
+              </div>
+            </div>
+        </div>
     
-    <label for="city">City:</label>
-    <input type="text" name="city" id="city" value="{{ city }}" placeholder="Enter city" />
-    
-    <label for="date">Date:</label>
-    <input type="text" name="date" id="date" value="{{ date }}" placeholder="Enter Year or Year-Month (YYYY-MM)" />
+        <div class="cell crime_num">
+            <p>
+                {% if num_crimes %}
+                    <strong>{{ num_crimes }}</strong> crime(s) found for the selected filters.
+                {% else %}
+                    No crimes found for the selected filters.
+                {% endif %}
+            </p>
+        </div>
 
-    <label for="crime_type">Crime Type:</label>
-    <select name="crime_type" id="crime_type">
-      <option value="">All Crime Types</option>
-      {% for category in crime_categories %}
-        <option value="{{ category }}" {% if category == request.args.get('crime_type') %}selected{% endif %}>{{ category | replace('-', ' ') | capitalize }}</option>
-      {% endfor %}
-    </select>
-    
-    <button type="submit">Filter</button>
-  </form>
+            <div class="cell small-12 medium-2 form-container">
+                <form method="GET" action="/">
+                <label for="postcode">Postcode:</label>
+                <input type="text" name="postcode" id="postcode" value="{{ postcode }}" placeholder="Enter postcode">
+
+                <label for="city">City:</label>
+                <input type="text" name="city" id="city" value="{{ city }}" placeholder="Enter city">
+
+                <label for="date">Date:</label>
+                <input type="text" name="date" id="date" value="{{ date }}" placeholder="Enter Year or Year-Month">
+
+                <label for="crime_type">Crime Type:</label>
+                <select name="crime_type" id="crime_type">
+                    <option value="">All Crime Types</option>
+                    {% for category in crime_categories %}
+                    <option value="{{ category }}" {% if category == crime_type %}selected{% endif %}>
+                        {{ category | replace('-', ' ') | capitalize }}
+                    </option>
+                    {% endfor %}
+                </select>
+
+                <button type="submit">Filter</button>
+                </form>
+            </div>
+    </div>
+  </div>
+
+
+
 
   <div id="map"></div>
+
+
+  {% set location_counts = {} %}
+    {% for crime in crimes %}
+        {% if crime.location.latitude and crime.location.longitude %}
+            {% set key = crime.location.latitude|string + ',' + crime.location.longitude|string %}
+            {% if key in location_counts %}
+                {% set _ = location_counts.update({key: location_counts[key] + 1}) %}
+            {% else %}
+                {% set _ = location_counts.update({key: 1}) %}
+            {% endif %}
+        {% endif %}
+    {% endfor %}
+
 
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
   <script src="https://unpkg.com/leaflet.heat/dist/leaflet-heat.js"></script>
   <script>
+
+    //Map 
     var map = L.map('map').setView([{{ 53.3891119 }}, {{ -2.9593397 }}], 13);
 
     L.tileLayer('https://api.maptiler.com/maps/streets-v2/{z}/{x}/{y}.png?key=BzEr8dMwG2P23sz0igki', {
       attribution: '&copy; OpenStreetMap contributors'
     }).addTo(map);
+    //Map End 
 
-    var heat = L.heatLayer([
-      {% for crime in crimes %}
-        [{{ crime.location.latitude }}, {{ crime.location.longitude }}],
-      {% endfor %}
-    ], {
-      radius: 30, <!-- 35 -->
-      blur: 15,
-      maxZoom: 5, <!-- 17 -->
-    }).addTo(map);
 
+    // Heat Map 
+    var heatPoints = [
+    {% for crime in crimes %}
+      {% if crime.location.latitude and crime.location.longitude %}
+        [{{ crime.location.latitude }}, {{ crime.location.longitude }}, 1],
+      {% endif %}
+    {% endfor %}
+  ];
+
+    var heat = L.heatLayer(heatPoints, {
+        maxZoom: 17, 
+        radius: 30, 
+        blur: 15, 
+        gradient: {0.4: 'blue', 0.65: 'yellow', 1: 'red'}, 
+        max: 1.5
+    }).addTo(map); 
+    // Heat Map End 
+
+
+    // Scale 
     L.control.scale({ 
         metric: true, 
         imperial: false, 
         position: 'bottomright'
     }).addTo(map); 
+    //Scale End 
 
+    // Add invisible circle markers with popups showing crime counts
+  {% for location, count in location_counts.items() %}
+  {% set lat, lng = location.split(',') %}
+  var marker = L.circleMarker([{{ lat }}, {{ lng }}], {
+    radius: 20,
+    color: 'transparent',
+    fillColor: 'transparent',
+    fillOpacity: 0
+  }).addTo(map);
+
+  marker.bindPopup("{{ count }} crime(s) in this area");
+    {% endfor %}
+
+    
   </script>
+  
+    <script>
+        $(document).foundation();
+    </script>
+
 </body>
 </html>
